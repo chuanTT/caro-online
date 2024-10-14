@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -23,7 +23,8 @@ import { AuthModule } from './auth/auth.module';
           username: configService.get('USER_DB'),
           password: configService.get('PASSWORD_DB'),
           database: configService.get('DATABASE'),
-          entities: [User],
+          entities: [join(__dirname, '**', '*.entity{.ts,.js}')],
+          subscribers: [join(__dirname, '**', '*.subscriber{.ts,.js}')],
           synchronize: configService.get('SYNCHRONIZE'),
         };
       },
