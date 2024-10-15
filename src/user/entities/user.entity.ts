@@ -13,7 +13,7 @@ export class User extends BaseTimeEntity {
   @Column('varchar', { length: 40 })
   lastName: string;
 
-  @Column('varchar')
+  @Column('varchar', { unique: true })
   email: string;
 
   @Column('varchar', { nullable: true })

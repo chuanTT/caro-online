@@ -6,6 +6,9 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { publicFolder } from './common/configs/file-default.config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -18,17 +21,29 @@ import { join } from 'path';
       useFactory: (configService: ConfigService) => {
         return {
           type: 'mysql',
-          host: configService.get('HOST'),
-          port: +configService.get('PORT_DB'),
-          username: configService.get('USER_DB'),
-          password: configService.get('PASSWORD_DB'),
-          database: configService.get('DATABASE'),
+          host: configService.get('database.host'),
+          port: +configService.get('database.post'),
+          username: configService.get('database.user'),
+          password: configService.get('database.password'),
+          database: configService.get('database.name'),
           entities: [join(__dirname, '**', '*.entity{.ts,.js}')],
-          subscribers: [join(__dirname, '**', '*.subscriber{.ts,.js}')],
-          synchronize: configService.get('SYNCHRONIZE'),
+          // subscribers: [join(__dirname, '**', '*.subscriber{.ts,.js}')],
+          synchronize: configService.get<boolean>('typeorm.synchronize', false),
         };
       },
-      imports: [ConfigModule],
+      inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', publicFolder),
+    }),
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService) => {
+        return {
+          global: true,
+          secret: configService.get('jwt.secret'),
+          signOptions: { expiresIn: '60s', algorithm: 'RS256' },
+        };
+      },
       inject: [ConfigService],
     }),
     UserModule,
