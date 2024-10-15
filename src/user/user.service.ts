@@ -1,10 +1,9 @@
+import { User } from 'src/user/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { hashHexSha256 } from 'src/common/utils/hard-hex.util';
 
 @Injectable()
 export class UserService {
@@ -22,8 +21,14 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOneUserByUuid(uuid: string, options?: FindOneOptions<User>) {
+    return this.usersRepository.findOne({
+      ...(options ?? {}),
+      where: {
+        uuid,
+        ...(options?.where ?? {}),
+      },
+    });
   }
 
   findOneEmail(email: string) {
@@ -34,6 +39,11 @@ export class UserService {
 
   update(id: number) {
     return `This action updates a #${id} user`;
+  }
+
+  updateToken(id: string, token: string) {
+    const hashToken = hashHexSha256(token);
+    return this.usersRepository.update(id, { refreshToken: hashToken });
   }
 
   remove(id: number) {

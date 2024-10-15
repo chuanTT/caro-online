@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { publicFolder } from './common/configs/file-default.config';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -35,16 +34,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', publicFolder),
-    }),
-    JwtModule.registerAsync({
-      useFactory: (configService: ConfigService) => {
-        return {
-          global: true,
-          secret: configService.get('jwt.secret'),
-          signOptions: { expiresIn: '60s', algorithm: 'RS256' },
-        };
-      },
-      inject: [ConfigService],
     }),
     UserModule,
     AuthModule,

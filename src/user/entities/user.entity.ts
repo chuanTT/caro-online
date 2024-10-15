@@ -27,4 +27,7 @@ export class User extends BaseTimeEntity {
 
   @Column('enum', { enum: StatusEnum, default: StatusEnum.IDLE })
   status: number;
+
+  @Column('varchar', { length: 64 })
+  refreshToken: string;
 }
