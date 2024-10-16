@@ -14,6 +14,7 @@ import { UserService } from 'src/user/user.service';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { comparePassword } from 'src/common/utils/password.util';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -34,13 +35,34 @@ export class AuthService {
     });
   }
 
+  payloadToken(user: TGenerateAccessRefreshToken) {
+    return {
+      id: user?.id,
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+    };
+  }
+
   async generateAccessRefreshToken(
     payload: TGenerateAccessRefreshToken,
   ): Promise<IReturnGenerateToken> {
+    const accessToken = await this.createAccessToken({ payload });
+    const refreshToken = await this.createRefreshToken({ payload });
+
+    if (refreshToken && payload?.id) {
+      await this.userService.updateToken(payload?.id, refreshToken);
+    }
+
     return {
-      accessToken: await this.createAccessToken({ payload }),
-      refreshToken: await this.createRefreshToken({ payload }),
+      accessToken,
+      refreshToken,
     };
+  }
+
+  comparePasswordAuth(password: string, hashedPassword: string) {
+    const keySecret = this.configService.get('password.secret');
+    const newPass = password + keySecret;
+    return comparePassword(newPass, hashedPassword);
   }
 
   async register(payload: RegisterAuthDto) {
@@ -52,16 +74,8 @@ export class AuthService {
     }
 
     const result = await this.userService.create(payload);
-    const generateToken = await this.generateAccessRefreshToken({
-      uuid: result.uuid,
-      firstName: result.firstName,
-      lastName: result.lastName,
-    });
-    await this.userService.updateToken(
-      result?.uuid,
-      generateToken?.refreshToken,
-    );
-    return generateToken;
+    const newPayload = this.payloadToken(result);
+    return await this.generateAccessRefreshToken(newPayload);
   }
 
   async login(payload: LoginAuthDto) {
@@ -72,22 +86,26 @@ export class AuthService {
     if (!result) {
       throw unauthorizedException;
     }
-    const keySecret = this.configService.get('password.secret');
-    const newPass = payload?.password + keySecret;
-    const isMatchPassword = comparePassword(newPass, result?.password);
+    const isMatchPassword = this.comparePasswordAuth(
+      payload?.password,
+      result?.password,
+    );
     if (!isMatchPassword) {
       throw unauthorizedException;
     }
-    const generateToken = await this.generateAccessRefreshToken({
-      uuid: result?.uuid,
-      firstName: result?.firstName,
-      lastName: result?.lastName,
-    });
+    const newPayload = this.payloadToken(result);
+    return await this.generateAccessRefreshToken(newPayload);
+  }
 
-    await this.userService.updateToken(
-      result?.uuid,
-      generateToken?.refreshToken,
-    );
-    return generateToken;
+  async logout(id: string) {
+    return this.userService.updateToken(id, null);
+  }
+
+  async refresh(user: User) {
+    const payload = this.payloadToken(user);
+    const accessToken = await this.createAccessToken({ payload });
+    return {
+      accessToken,
+    };
   }
 }

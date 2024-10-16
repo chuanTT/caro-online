@@ -1,11 +1,12 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ActivityEnum, StatusEnum } from '../interface/user.interface';
 import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User extends BaseTimeEntity {
   @PrimaryGeneratedColumn('uuid')
-  uuid: string;
+  id: string;
 
   @Column('varchar', { length: 40 })
   firstName: string;
@@ -19,6 +20,7 @@ export class User extends BaseTimeEntity {
   @Column('varchar', { nullable: true })
   avatar: string;
 
+  @Exclude()
   @Column('varchar')
   password: string;
 
@@ -28,6 +30,7 @@ export class User extends BaseTimeEntity {
   @Column('enum', { enum: StatusEnum, default: StatusEnum.IDLE })
   status: number;
 
-  @Column('varchar', { length: 64 })
+  @Exclude()
+  @Column('varchar', { length: 64, nullable: true })
   refreshToken: string;
 }
