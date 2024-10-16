@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterLoad, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ActivityEnum, StatusEnum } from '../interface/user.interface';
 import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 import { Exclude } from 'class-transformer';
@@ -33,4 +33,15 @@ export class User extends BaseTimeEntity {
   @Exclude()
   @Column('varchar', { length: 64, nullable: true })
   refreshToken: string;
+
+  fullName: string;
+
+  get fullNameGetter(): string {
+    return `${this.firstName?.trim() ?? ''} ${this.lastName?.trim() ?? ''}`.trim();
+  }
+
+  @AfterLoad()
+  getFullName() {
+    this.fullName = this.fullNameGetter;
+  }
 }

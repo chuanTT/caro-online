@@ -48,11 +48,9 @@ export class AuthService {
   ): Promise<IReturnGenerateToken> {
     const accessToken = await this.createAccessToken({ payload });
     const refreshToken = await this.createRefreshToken({ payload });
-
     if (refreshToken && payload?.id) {
       await this.userService.updateToken(payload?.id, refreshToken);
     }
-
     return {
       accessToken,
       refreshToken,
@@ -72,7 +70,6 @@ export class AuthService {
         'Tài khoản đã tồn tại trong hệ thống',
       );
     }
-
     const result = await this.userService.create(payload);
     const newPayload = this.payloadToken(result);
     return await this.generateAccessRefreshToken(newPayload);

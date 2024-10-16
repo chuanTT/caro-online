@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hashHexSha256 } from 'src/common/utils/hard-hex.util';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -48,16 +50,22 @@ export class UserService {
     });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} user`;
+  async updateUserMe(id: string, updateUserDto: UpdateUserDto) {
+    await this.update(id, updateUserDto);
+    const user = await this.usersRepository.findOne({
+      where: {
+        id,
+      },
+    });
+    return plainToInstance(User, user);
+  }
+
+  update(id: string, updateUser: Partial<User>) {
+    return this.usersRepository.update(id, updateUser);
   }
 
   updateToken(id: string, token: string) {
     const hashToken = !!token ? hashHexSha256(token) : null;
     return this.usersRepository.update(id, { refreshToken: hashToken });
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }
