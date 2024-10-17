@@ -40,6 +40,7 @@ export class UserService {
         status: true,
         createdAt: true,
         updatedAt: true,
+        refreshToken: true,
       },
     });
   }

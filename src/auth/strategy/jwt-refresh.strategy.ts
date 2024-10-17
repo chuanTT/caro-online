@@ -6,6 +6,8 @@ import { UserService } from 'src/user/user.service';
 import { TGenerateAccessRefreshToken } from '../interface/auth.interface';
 import { JWTRefresh } from 'src/common/configs/strategy.config';
 import { hashHexSha256 } from 'src/common/utils/hard-hex.util';
+import { plainToInstance } from 'class-transformer';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, JWTRefresh) {
@@ -36,6 +38,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, JWTRefresh) {
     if (!user) {
       throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
-    return user;
+    return plainToInstance(User, user);
   }
 }

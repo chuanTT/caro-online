@@ -1,12 +1,11 @@
-import { IsNotEmpty, Length } from 'class-validator';
 import { Match } from '../decorators/math.decorator';
+import { PasswordValidationDecorators } from '../decorators/password.decorator';
 
 export class PasswordDto {
-  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
-  @Length(8, 128, { message: 'Mật khẩu tối thiểu từ 8 đến 128 ký tự' })
+  @PasswordValidationDecorators()
   password: string;
 
-  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
+  @PasswordValidationDecorators('Xác nhận mật khẩu')
   @Match('password', { message: 'Mật khẩu không trùng khớp' })
   confirmPassword: string;
 }
