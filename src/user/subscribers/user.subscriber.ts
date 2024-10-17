@@ -3,13 +3,14 @@ import {
   EntitySubscriberInterface,
   InsertEvent,
   DataSource,
+  UpdateEvent,
 } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { hashPassSync } from 'src/common/utils/password.util';
 import { defaultAvatar } from 'src/common/utils/default-avatar.util';
+import { hashPassSync } from 'src/common/utils/password.util';
 
 @Injectable()
 @EventSubscriber() // Decorator của TypeORM
@@ -27,14 +28,24 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     return User;
   }
 
+  private hassPassword(password: string) {
+    const keySecret = this.configService.get('password.secret');
+    const newPass = password + keySecret;
+    return hashPassSync(newPass);
+  }
+
   /**
    * Lắng nghe sự kiện trước khi một user được insert
    */
   beforeInsert(event: InsertEvent<User>) {
-    const keySecret = this.configService.get('password.secret');
-    const newPass = event.entity.password + keySecret;
-    event.entity.password = hashPassSync(newPass);
+    event.entity.password = this.hassPassword(event.entity.password);
     event.entity.avatar = defaultAvatar();
+  }
+
+  beforeUpdate(event: UpdateEvent<User>) {
+    if (event.entity?.password) {
+      event.entity.password = this.hassPassword(event.entity.password);
+    }
   }
 
   // Tương tự cho update và remove

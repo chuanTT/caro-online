@@ -5,6 +5,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { JWTAuthAccessGuard } from './guards/jwt-auth-access.guard';
 import { JWTAuthRefreshGuard } from './guards/jwt-auth-refresh.guard';
 import { User } from 'src/user/entities/user.entity';
+import { ensureDirectoryExistence } from 'src/common/validate/file.validate';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -12,6 +13,7 @@ export class AuthController {
   @UseGuards(JWTAuthAccessGuard)
   @Get('profile')
   getProfile(@Req() request: Request) {
+    ensureDirectoryExistence('./uploads');
     return request['user'];
   }
 

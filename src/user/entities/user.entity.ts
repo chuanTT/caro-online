@@ -42,6 +42,8 @@ export class User extends BaseTimeEntity {
 
   @AfterLoad()
   getFullName() {
-    this.fullName = this.fullNameGetter;
+    if (this.firstName || this.lastName) {
+      this.fullName = this.fullNameGetter;
+    }
   }
 }
