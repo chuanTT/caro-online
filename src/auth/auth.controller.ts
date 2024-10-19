@@ -6,6 +6,7 @@ import { JWTAuthAccessGuard } from './guards/jwt-auth-access.guard';
 import { JWTAuthRefreshGuard } from './guards/jwt-auth-refresh.guard';
 import { User } from 'src/user/entities/user.entity';
 import { ensureDirectoryExistence } from 'src/common/validate/file.validate';
+import { EmailDto } from 'src/common/dtos/email.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -39,5 +40,10 @@ export class AuthController {
   async getRefresh(@Req() request: Request) {
     const user = request['user'] as User;
     return this.authService.refresh(user);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() emailDto: EmailDto) {
+    return this.authService.forgotPassword(emailDto);
   }
 }

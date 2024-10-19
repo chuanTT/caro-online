@@ -24,7 +24,6 @@ export function validateFile(options: {
     }
 
     // Kiểm tra kích thước file
-    console.log(`File size: ${JSON.stringify(file)} bytes`); // Log kích thước file
     if (file.size > maxSize) {
       return callback(
         new BadRequestException(

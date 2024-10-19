@@ -23,6 +23,9 @@ export function multerConfig(options: {
       },
     }),
     fileFilter: validateFile(options),
+    dest: (err) => {
+      console.log(err);
+    },
     limits: {
       fileSize: options.maxSize, // Giới hạn kích thước file
     },

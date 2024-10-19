@@ -15,6 +15,7 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { comparePassword } from 'src/common/utils/password.util';
 import { User } from 'src/user/entities/user.entity';
+import { EmailDto } from 'src/common/dtos/email.dto';
 
 @Injectable()
 export class AuthService {
@@ -104,5 +105,18 @@ export class AuthService {
     return {
       accessToken,
     };
+  }
+
+  async forgotPassword({ email }: EmailDto) {
+    const currentUser = await this.userService.findOneEmail(email);
+    if (!currentUser) {
+      throw new UnprocessableEntityException(
+        'Email không tồn tại trong hệ thống',
+      );
+    }
+    return this.userService.resetPasswordSendEmail(
+      currentUser?.id,
+      currentUser?.email,
+    );
   }
 }

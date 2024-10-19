@@ -36,9 +36,8 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file);
     const user = request['user'] as User;
-    return this.userService.updateUserMe(user?.id, updateUserDto);
+    return this.userService.updateUserMe(user?.id, updateUserDto, file);
   }
 
   @Patch('change-password')

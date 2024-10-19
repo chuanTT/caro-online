@@ -1,7 +1,7 @@
 export const covertMBToByte = (mb: number) => {
-  return mb * 1024 * 1024;
+  return mb * Math.pow(1024, 2);
 };
 
 export const covertByteToMB = (mb: number) => {
-  return mb / (1024 * 1024);
+  return mb / Math.pow(1024, 2);
 };
