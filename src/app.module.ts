@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { publicFolder } from './common/configs/file-default.config';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -26,7 +27,6 @@ import { publicFolder } from './common/configs/file-default.config';
           password: configService.get('database.password'),
           database: configService.get('database.name'),
           entities: [join(__dirname, '**', '*.entity{.ts,.js}')],
-          // subscribers: [join(__dirname, '**', '*.subscriber{.ts,.js}')],
           synchronize: configService.get<boolean>('typeorm.synchronize', false),
         };
       },
@@ -37,6 +37,7 @@ import { publicFolder } from './common/configs/file-default.config';
     }),
     UserModule,
     AuthModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

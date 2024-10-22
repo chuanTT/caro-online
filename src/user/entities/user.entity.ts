@@ -1,7 +1,14 @@
-import { AfterLoad, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  AfterLoad,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ActivityEnum, StatusEnum } from '../interface/user.interface';
 import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 import { Exclude } from 'class-transformer';
+import { Queue } from 'src/queue/entities/queue.entity';
 
 @Entity()
 export class User extends BaseTimeEntity {
@@ -33,6 +40,9 @@ export class User extends BaseTimeEntity {
   @Exclude()
   @Column('varchar', { length: 64, nullable: true })
   refreshToken: string;
+
+  @OneToMany(() => Queue, (queue) => queue.user)
+  queues: Queue[];
 
   fullName: string;
 
