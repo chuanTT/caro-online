@@ -11,35 +11,31 @@ import {
 } from '@nestjs/common';
 import { QueueService } from './queue.service';
 import { JWTAuthAccessGuard } from 'src/auth/guards/jwt-auth-access.guard';
+import { IdDto } from 'src/common/dtos/id.dto';
 
 @UseGuards(JWTAuthAccessGuard)
 @Controller('queue')
 export class QueueController {
   constructor(private readonly queueService: QueueService) {}
 
-  @Post()
-  create(@Req() request: Request) {
-    const user = request['user'];
-    return user;
-  }
-
   @Get()
   findAll() {
     return this.queueService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.queueService.findOne(+id);
+  @Post()
+  create(@Req() request: Request) {
+    const user = request['user'];
+    return this.queueService.create(user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.queueService.update(+id);
+  @Patch('cancel/:id')
+  cancel(@Param() { id }: IdDto) {
+    return this.queueService.update(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: IdDto) {
     return this.queueService.remove(+id);
   }
 }

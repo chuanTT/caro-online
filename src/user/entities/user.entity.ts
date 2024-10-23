@@ -5,20 +5,28 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ActivityEnum, StatusEnum } from '../interface/user.interface';
 import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 import { Exclude } from 'class-transformer';
 import { Queue } from 'src/queue/entities/queue.entity';
+import { ActivityEnum, StatusEnum } from '../enums';
 
 @Entity()
 export class User extends BaseTimeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('varchar', { length: 40 })
+  @Column({
+    name: 'first_name',
+    type: 'varchar',
+    length: 40,
+  })
   firstName: string;
 
-  @Column('varchar', { length: 40 })
+  @Column({
+    name: 'last_name',
+    type: 'varchar',
+    length: 40,
+  })
   lastName: string;
 
   @Column('varchar', { unique: true })
@@ -31,14 +39,26 @@ export class User extends BaseTimeEntity {
   @Column('varchar')
   password: string;
 
-  @Column('enum', { enum: ActivityEnum, default: ActivityEnum.ONLINE })
-  activity: number;
+  @Column({
+    name: 'activity',
+    type: 'smallint',
+    default: ActivityEnum.ONLINE,
+  })
+  activity: ActivityEnum;
 
-  @Column('enum', { enum: StatusEnum, default: StatusEnum.IDLE })
+  @Column({
+    name: 'status',
+    type: 'smallint',
+    default: StatusEnum.IDLE,
+  })
   status: number;
 
   @Exclude()
-  @Column('varchar', { length: 64, nullable: true })
+  @Column({
+    name: 'refresh_token',
+    type: 'varchar',
+    nullable: true,
+  })
   refreshToken: string;
 
   @OneToMany(() => Queue, (queue) => queue.user)

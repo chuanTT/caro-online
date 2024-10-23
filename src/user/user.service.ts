@@ -27,10 +27,6 @@ export class UserService {
     private dataSource: DataSource,
   ) {}
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
   findOneUserByIdAndEmail(id: string, email: string, refreshToken?: string) {
     return this.usersRepository.findOne({
       where: {
