@@ -1,19 +1,19 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
-import { UserService } from 'src/user/user.service';
 import { Queue } from './entities/queue.entity';
 import { FindManyOptions, Not, Repository } from 'typeorm';
 import { StatusQueue } from './enums';
 import { OmitFindManyOption } from 'src/common/types/omit-find-many-options.type';
 import { mathTeam } from './constant/math-team.const';
+import { ChessService } from 'src/chess/chess.service';
 
 @Injectable()
 export class QueueService {
   constructor(
     @InjectRepository(Queue)
     private queueRepository: Repository<Queue>,
-    private readonly userService: UserService,
+    private readonly chessService: ChessService,
   ) {}
 
   async checkAndMatchTeam(userId: string, team = mathTeam): Promise<boolean> {
@@ -29,7 +29,9 @@ export class QueueService {
   }
 
   async mathedTeamTransaction(user: User, currentQueue: Queue) {
-    return this.queueRepository.manager.transaction(async (entityManager) => {
+    let isMathed = false;
+    let currentPlayer: Queue = undefined;
+    await this.queueRepository.manager.transaction(async (entityManager) => {
       const players = await this.findAllByStatusWating({
         options: {
           relations: {
@@ -39,26 +41,47 @@ export class QueueService {
         userId: user?.id,
       });
       if (players?.length > 0) {
-        for (const player of players) {
-          await entityManager.update(Queue, player?.id, {
-            status: StatusQueue.MATCHED,
-          });
-        }
+        currentPlayer = players[0];
+        await entityManager.update(Queue, currentPlayer?.id, {
+          status: StatusQueue.MATCHED,
+        });
         await entityManager.update(Queue, currentQueue?.id, {
           status: StatusQueue.MATCHED,
         });
+        isMathed = true;
       }
     });
+
+    if (isMathed && currentPlayer?.user) {
+      await this.chessService.create(currentQueue?.user, currentPlayer?.user);
+    }
+    return isMathed;
   }
 
   async create(user: User) {
+    const checkQueue = await this.queueRepository.findOne({
+      where: {
+        user: {
+          id: user?.id,
+        },
+        status: StatusQueue.MATCHED,
+      },
+      select: ['id'],
+    });
+
+    if (checkQueue) {
+      throw new UnprocessableEntityException('Bạn đã được ghép cặp đấu rồi!!');
+    }
+
     await this.updateStatusWatingToCancel(user?.id);
     const queue = new Queue();
     queue.user = user;
     const resultQueue = await this.queueRepository.save(queue);
     const firstPlayer = await this.checkAndMatchTeam(user?.id);
     if (firstPlayer) {
-      await this.mathedTeamTransaction(user, resultQueue);
+      const isMathed = await this.mathedTeamTransaction(user, resultQueue);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      isMathed && resultQueue && (resultQueue.status = StatusQueue.MATCHED);
     }
     return resultQueue;
   }
@@ -114,6 +137,12 @@ export class QueueService {
   async updateStatusToMatched(id: string) {
     return this.queueRepository.update(id, {
       status: StatusQueue.MATCHED,
+    });
+  }
+
+  async updateStatusToCompleted(id: string) {
+    return await this.queueRepository.update(id, {
+      status: StatusQueue.COMPLETED,
     });
   }
 

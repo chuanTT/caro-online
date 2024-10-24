@@ -9,6 +9,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { publicFolder } from './common/configs/file-default.config';
 import { QueueModule } from './queue/queue.module';
+import { ChessModule } from './chess/chess.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { QueueModule } from './queue/queue.module';
     UserModule,
     AuthModule,
     QueueModule,
+    ChessModule,
   ],
   controllers: [AppController],
   providers: [AppService],

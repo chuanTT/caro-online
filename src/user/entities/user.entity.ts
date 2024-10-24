@@ -9,6 +9,7 @@ import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 import { Exclude } from 'class-transformer';
 import { Queue } from 'src/queue/entities/queue.entity';
 import { ActivityEnum, StatusEnum } from '../enums';
+import { Chess } from 'src/chess/entities/chess.entity';
 
 @Entity()
 export class User extends BaseTimeEntity {
@@ -63,6 +64,12 @@ export class User extends BaseTimeEntity {
 
   @OneToMany(() => Queue, (queue) => queue.user)
   queues: Queue[];
+
+  @OneToMany(() => Chess, (chess) => chess.player1)
+  gamesAsPlayer1: Chess[];
+
+  @OneToMany(() => Chess, (chess) => chess.player2)
+  gamesAsPlayer2: Chess[];
 
   fullName: string;
 
