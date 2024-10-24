@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Param,
-  Delete,
-  // UseGuards,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import { QueueService } from './queue.service';
 import { JWTAuthAccessGuard } from 'src/auth/guards/jwt-auth-access.guard';
 import { IdDto } from 'src/common/dtos/id.dto';
@@ -17,12 +7,6 @@ import { IdDto } from 'src/common/dtos/id.dto';
 @Controller('queue')
 export class QueueController {
   constructor(private readonly queueService: QueueService) {}
-
-  @Get()
-  findAll() {
-    return this.queueService.findAll();
-  }
-
   @Post()
   create(@Req() request: Request) {
     const user = request['user'];
@@ -31,11 +15,6 @@ export class QueueController {
 
   @Patch('cancel/:id')
   cancel(@Param() { id }: IdDto) {
-    return this.queueService.update(id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: IdDto) {
-    return this.queueService.remove(+id);
+    return this.queueService.cancelQueue(id);
   }
 }
