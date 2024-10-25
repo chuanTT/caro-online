@@ -1,9 +1,16 @@
-import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { StatusChess } from '../enums/status-chess.enum';
 import { TurnChess } from '../enums/turn-chess.enum';
+import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
 
+@Entity()
 export class Chess extends BaseTimeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -14,15 +21,18 @@ export class Chess extends BaseTimeEntity {
   @Column('integer', { default: 50 })
   column: number;
 
+  @Index('player1_chess')
   @ManyToOne(() => User, (user) => user.gamesAsPlayer1)
   player1: User;
 
+  @Index('player2_chess')
   @ManyToOne(() => User, (user) => user.gamesAsPlayer2)
   player2: User;
 
   @ManyToOne(() => User, { nullable: true })
   winner: User | null;
 
+  @Index('current_turn_chess')
   @Column({
     name: 'current_turn',
     type: 'smallint',
@@ -37,10 +47,11 @@ export class Chess extends BaseTimeEntity {
   })
   endDate: Date | null;
 
+  @Index('status_chess')
   @Column({
     name: 'status',
     type: 'smallint',
     default: StatusChess.ONGOING,
   })
-  status: string;
+  status: StatusChess;
 }

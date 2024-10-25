@@ -2,6 +2,7 @@ import {
   AfterLoad,
   Column,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -30,6 +31,7 @@ export class User extends BaseTimeEntity {
   })
   lastName: string;
 
+  @Index('email_user')
   @Column('varchar', { unique: true })
   email: string;
 
@@ -40,6 +42,7 @@ export class User extends BaseTimeEntity {
   @Column('varchar')
   password: string;
 
+  @Index('activity_user')
   @Column({
     name: 'activity',
     type: 'smallint',
@@ -47,12 +50,13 @@ export class User extends BaseTimeEntity {
   })
   activity: ActivityEnum;
 
+  @Index('status_user')
   @Column({
     name: 'status',
     type: 'smallint',
     default: StatusEnum.IDLE,
   })
-  status: number;
+  status: StatusEnum;
 
   @Exclude()
   @Column({

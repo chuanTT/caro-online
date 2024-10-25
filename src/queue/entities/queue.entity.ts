@@ -14,6 +14,7 @@ export class Queue extends BaseTimeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index('status_queue')
   @Column({
     name: 'status',
     type: 'smallint',

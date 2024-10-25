@@ -1,4 +1,4 @@
 export enum TurnChess {
   'X' = 0,
-  'Y' = 1,
+  'O' = 1,
 }
