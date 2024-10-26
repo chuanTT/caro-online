@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Chess } from './entities/chess.entity';
-import { Repository } from 'typeorm';
+import { Between, FindManyOptions, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { StatusChess } from './enums/status-chess.enum';
 import { OmitFindManyOption } from 'src/common/types/omit-find-many-options.type';
@@ -45,14 +45,50 @@ export class ChessService extends BasePagination<Chess> {
     return turnX || turnO;
   }
 
-  updateTurn() {}
+  async updateTurn(id: string, userId: string) {
+    const currentData = await this.findOne(
+      id,
+      userId,
+      {
+        status: StatusChess.ONGOING,
+      },
+      {
+        relations: {
+          player1: true,
+          player2: true,
+        },
+      },
+    );
+
+    let currentTurn: TurnChess | undefined;
+    if (
+      currentData?.player1?.id === userId &&
+      currentData?.currentTurn === TurnChess.X
+    ) {
+      currentTurn = TurnChess.O;
+    } else if (
+      currentData?.player2?.id === userId &&
+      currentData?.currentTurn === TurnChess.O
+    ) {
+      currentTurn = TurnChess.X;
+    }
+
+    if (currentTurn !== undefined) {
+      const updated = await this.chessRepository.update(id, {
+        currentTurn,
+      });
+      return !!updated?.affected;
+    }
+    return false;
+  }
 
   async findOne(
     id: string,
     userId: string,
+    where?: FindManyOptions<Chess>['where'],
     options?: OmitFindManyOption<Chess>,
   ) {
-    const currentWhere = { id };
+    const currentWhere = { id, ...where };
     const current = await this.chessRepository.findOne({
       where: [
         {
@@ -118,7 +154,10 @@ export class ChessService extends BasePagination<Chess> {
     return plainToInstance(Chess, current);
   }
 
-  async findAllWinder(userId: string, findWinnerDto: FindWinnerDto) {
+  async findAllWinder(
+    userId: string,
+    { endDate, limit, page, startDate }: FindWinnerDto,
+  ) {
     return await this.paginate({
       options: {
         where: {
@@ -126,6 +165,9 @@ export class ChessService extends BasePagination<Chess> {
           winner: {
             id: userId,
           },
+          endDate: endDate
+            ? Between(startDate, endDate)
+            : Between(startDate, startDate),
         },
         relations: {
           player1: true,
@@ -133,15 +175,22 @@ export class ChessService extends BasePagination<Chess> {
           winner: true,
         },
       },
-      ...findWinnerDto,
+      limit,
+      page,
     });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} chess`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chess`;
+  async updateWinner(id: string, userId: string) {
+    return this.chessRepository.update(
+      {
+        id,
+        status: StatusChess.ONGOING,
+      },
+      {
+        winner: {
+          id: userId,
+        },
+      },
+    );
   }
 }

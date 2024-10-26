@@ -4,11 +4,13 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { StatusChess } from '../enums/status-chess.enum';
 import { TurnChess } from '../enums/turn-chess.enum';
 import { BaseTimeEntity } from 'src/common/entities/base-time.entity';
+import { Move } from 'src/move/entities/move.entity';
 
 @Entity()
 export class Chess extends BaseTimeEntity {
@@ -54,4 +56,7 @@ export class Chess extends BaseTimeEntity {
     default: StatusChess.ONGOING,
   })
   status: StatusChess;
+
+  @OneToMany(() => Move, (move) => move.chess)
+  moves: Move[];
 }

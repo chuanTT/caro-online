@@ -53,9 +53,11 @@ export class QueueService {
     });
 
     if (isMathed && currentPlayer?.user) {
-      await this.chessService.create(currentQueue?.user, currentPlayer?.user);
+      return await this.chessService.create(
+        currentQueue?.user,
+        currentPlayer?.user,
+      );
     }
-    return isMathed;
   }
 
   async create(user: User) {
@@ -81,7 +83,8 @@ export class QueueService {
     if (firstPlayer) {
       const isMathed = await this.mathedTeamTransaction(user, resultQueue);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      isMathed && resultQueue && (resultQueue.status = StatusQueue.MATCHED);
+      !!isMathed && resultQueue && (resultQueue.status = StatusQueue.MATCHED);
+      return isMathed;
     }
     return resultQueue;
   }

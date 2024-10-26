@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Delete,
-  Req,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards, Query } from '@nestjs/common';
 import { ChessService } from './chess.service';
 import { User } from 'src/user/entities/user.entity';
 import { JWTAuthAccessGuard } from 'src/auth/guards/jwt-auth-access.guard';
@@ -31,15 +22,5 @@ export class ChessController {
   findOne(@Param('id') id: string, @Req() resquest: Request) {
     const user: User = resquest['user'];
     return this.chessService.findOne(id, user?.id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.chessService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chessService.remove(+id);
   }
 }
